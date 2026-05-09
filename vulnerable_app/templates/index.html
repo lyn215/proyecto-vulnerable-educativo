@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Security Lab — Vulnerable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<nav>
+    <span>🔓 Sentiment Security Lab <em>(versión vulnerable)</em></span>
+    <div>
+        {% if session.get('usuario') %}
+            <span>👤 {{ session['usuario'] }}</span>
+            <a href="/logout">Salir</a>
+        {% else %}
+            <a href="/login">Iniciar sesión</a>
+        {% endif %}
+        <a href="/historial">Historial</a>
+        <a href="/reporte">⬇ CSV</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="warning-banner">
+        ⚠️ <strong>LABORATORIO LOCAL — VERSIÓN VULNERABLE INTENCIONAL</strong><br>
+        Este entorno contiene fallos de seguridad documentados con fines educativos.<br>
+        No desplegar en redes públicas.
+    </div>
+
+    <h1>Analizador de Sentimientos</h1>
+
+    <form action="/analizar" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Comentario manual:</label>
+            <!-- [VULN-08] Sin maxlength ni validación -->
+            <textarea name="comentario" rows="4" placeholder="Escribe un comentario..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>O sube un archivo CSV / TXT:</label>
+            <!-- [VULN-11] Sin restricción de tipo de archivo en el input -->
+            <input type="file" name="archivo">
+        </div>
+
+        <button type="submit">Analizar</button>
+    </form>
+
+    <div class="vuln-notes">
+        <h3>🐛 Vulnerabilidades intencionales en esta página:</h3>
+        <ul>
+            <li>[VULN-08] Sin límite de longitud en el textarea</li>
+            <li>[VULN-11] Input de archivo sin restricción de tipo</li>
+            <li>[VULN-09] Los resultados se renderizan sin escape (XSS posible)</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

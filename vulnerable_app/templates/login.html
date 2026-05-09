@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login — Vulnerable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="container" style="max-width:400px; margin-top:80px;">
+    <h1>🔓 Iniciar Sesión</h1>
+
+    <!-- [VULN-04] Credenciales de ejemplo visibles en comentario HTML -->
+    <!-- admin:admin123 / alumno:password -->
+
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Usuario:</label>
+            <input type="text" name="usuario" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Contraseña:</label>
+            <!-- [VULN-06] Sin protección ante fuerza bruta -->
+            <input type="password" name="password">
+        </div>
+        <button type="submit">Entrar</button>
+    </form>
+
+    <div class="vuln-notes" style="margin-top:20px;">
+        <h3>🐛 Vulnerabilidades en este login:</h3>
+        <ul>
+            <li>[VULN-04] Contraseñas en texto plano en el código</li>
+            <li>[VULN-06] Sin rate limiting — fuerza bruta posible</li>
+            <li>[VULN-07] Error detallado revela nombre de usuario</li>
+            <li>[VULN-03] Login se registra con contraseña en el log</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

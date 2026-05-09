@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial — Vulnerable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<nav>
+    <span>🔓 Sentiment Security Lab</span>
+    <div><a href="/">Inicio</a> <a href="/reporte">⬇ CSV</a></div>
+</nav>
+<div class="container">
+    <h1>Historial de Análisis</h1>
+
+    <!-- [VULN-10] Filtro por usuario via URL: /historial?usuario=admin -->
+    <form method="GET">
+        <input type="text" name="usuario" placeholder="Filtrar por usuario..." value="{{ request.args.get('usuario','') }}">
+        <button type="submit">Filtrar</button>
+    </form>
+    <p style="font-size:0.85em; color:#888;">Prueba SQL Injection: <code>' OR '1'='1</code></p>
+
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Comentario</th><th>Sentimiento</th><th>Score</th><th>Usuario</th></tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            <tr class="{{ row['sentimiento'] }}">
+                <td>{{ row['id'] }}</td>
+                <td>{{ row['comentario'] | safe }}</td>
+                <td>{{ row['sentimiento'] }}</td>
+                <td>{{ row['score'] }}</td>
+                <td>{{ row['usuario'] }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">Sin registros.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

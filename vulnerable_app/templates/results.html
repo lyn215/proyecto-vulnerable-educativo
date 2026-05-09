@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados — Vulnerable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<nav>
+    <span>🔓 Sentiment Security Lab <em>(versión vulnerable)</em></span>
+    <div><a href="/">Inicio</a> <a href="/historial">Historial</a> <a href="/reporte">⬇ CSV</a></div>
+</nav>
+
+<div class="container">
+    <h1>Resultados del Análisis</h1>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <div class="stat positivo">✅ Positivos<br><strong>{{ stats.positivo }}</strong></div>
+        <div class="stat neutral">😐 Neutrales<br><strong>{{ stats.neutral }}</strong></div>
+        <div class="stat negativo">❌ Negativos<br><strong>{{ stats.negativo }}</strong></div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Comentario</th>
+                <th>Sentimiento</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in resultados %}
+            <tr class="{{ r.sentimiento }}">
+                <td>{{ loop.index }}</td>
+                <!-- [VULN-09] XSS: uso de |safe sin sanitización previa -->
+                <td>{{ r.comentario | safe }}</td>
+                <td>{{ r.sentimiento }}</td>
+                <td>{{ r.score }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">Sin resultados.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="vuln-notes">
+        <h3>🐛 Vulnerabilidades activas en esta vista:</h3>
+        <ul>
+            <li>[VULN-09] <code>{{ '{{' }} r.comentario | safe {{ '}}' }}</code> — renderiza HTML sin escape (XSS)</li>
+            <li>[VULN-10] Los datos vienen de una query con concatenación directa</li>
+        </ul>
+        <p><strong>Prueba:</strong> ingresa <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> como comentario.</p>
+    </div>
+
+    <a href="/" class="btn">← Nuevo análisis</a>
+</div>
+</body>
+</html>
