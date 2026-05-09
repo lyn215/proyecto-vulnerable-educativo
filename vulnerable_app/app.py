@@ -16,10 +16,13 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
 
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+
 # [VULN-01] Debug mode activo — expone traceback completo al usuario
 app = Flask(__name__)
-app.secret_key = "1234"  # [VULN-02] Clave secreta débil y hardcodeada
-app.config["DEBUG"] = True  # [VULN-01]
+app.secret_key = os.urandom(24) # [VULN-02] Clave secreta débil y hardcodeada
+app.config["DEBUG"] = False  # [VULN-01]
 app.config["UPLOAD_FOLDER"] = "uploads"
 
 # [VULN-03] Logging sin filtrado de datos sensibles
@@ -31,9 +34,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # [VULN-04] Contraseña almacenada en texto plano
+password1 = "admin123"
+password2 = "password"
 USUARIOS = {
-    "admin": "admin123",
-    "alumno": "password"
+    "admin": generate_password_hash(password1),
+    "alumno": generate_password_hash(password2)
 }
 
 analyzer = SentimentIntensityAnalyzer()
@@ -51,11 +56,11 @@ def init_db():
     # [VULN-05] Tabla creada sin índices ni restricciones
     conn.execute("""
         CREATE TABLE IF NOT EXISTS resultados (
-            id INTEGER PRIMARY KEY,
-            comentario TEXT,
-            sentimiento TEXT,
-            score REAL,
-            usuario TEXT
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            comentario TEXT NOT NULL,
+            sentimiento TEXT NOT NULL,
+            score REAL NOT NULL,
+            usuario TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -215,3 +220,4 @@ if __name__ == "__main__":
     init_db()
     # [VULN-01] Debug y host 0.0.0.0 expuesto
     app.run(debug=True, host="0.0.0.0", port=5000)
+ 
