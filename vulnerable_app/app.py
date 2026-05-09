@@ -91,15 +91,15 @@ def login():
         password = request.form.get("password", "")
 
         # [VULN-03] Log con credenciales en texto plano
-        logger.debug(f"Intento de login: usuario={usuario} password={password}")
+        logger.info(f"Intento de login: usuario={usuario}")
 
         # [VULN-06] Sin rate limiting — vulnerable a fuerza bruta
-        if usuario in USUARIOS and USUARIOS[usuario] == password:
+        if usuario in USUARIOS and check_password_hash(USUARIOS[usuario], password):
             session["usuario"] = usuario
             return redirect(url_for("index"))
         else:
             # [VULN-07] Mensaje de error detallado que revela info del sistema
-            error = f"Usuario '{usuario}' no encontrado o contraseña incorrecta para ese usuario."
+            error = f"Usuario o contraseña incorrecta para ese usuario."
 
     return render_template("login.html", error=error)
 
